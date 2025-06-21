@@ -38,7 +38,7 @@ def main():
         part2_scenarios.append({'algorithm': UniformCostSearch, 'cost_type': cost})
         for heuristic in all_heuristics:
             part2_scenarios.append({'algorithm': AStarSearch, 'cost_type': cost, 'heuristic': heuristic})
-    runner.run_experiment("Part2", part2_scenarios, num_runs=30)
+    # runner.run_experiment("Part2", part2_scenarios, num_runs=30)
 
     # --- Parte 3: Busca Gulosa vs. A* ---
     print("Definindo cenários da Parte 3...")
@@ -54,7 +54,7 @@ def main():
     for cost in all_cost_types:
         for heuristic in all_heuristics:
             part3_scenarios.append({'algorithm': AStarSearch, 'cost_type': cost, 'heuristic': heuristic})
-    runner.run_experiment("Part3", part3_scenarios, num_runs=30)
+    # runner.run_experiment("Part3", part3_scenarios, num_runs=30)
 
     # --- Parte 4: Randomização da Vizinhança ---
     print("Definindo cenários da Parte 4...")
@@ -67,7 +67,7 @@ def main():
                 'random_successors': True,
                 'executions': 10
             })
-    runner.run_experiment("Part4", part4_scenarios, num_runs=15)
+    # runner.run_experiment("Part4", part4_scenarios, num_runs=15)
 
     print("\nTodos os experimentos selecionados foram concluídos.")
     print("Verifique a pasta 'results' para os arquivos CSV gerados.")

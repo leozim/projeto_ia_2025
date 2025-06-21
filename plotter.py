@@ -39,10 +39,17 @@ class ResultPlotter:
             return None
 
         df = pd.read_csv(filepath)
-        # Converte colunas para numérico, tratando erros
+        # Converte colunas para numérico, tratando erros. O 'coerce' transforma
+        # valores não numéricos (como 'inf') em NaN (Not a Number).
         for col in ['path_cost', 'nodes_visited', 'nodes_generated', 'execution_time_sec']:
             df[col] = pd.to_numeric(df[col], errors='coerce')
-        df.dropna(inplace=True)  # Remove linhas onde a conversão falhou (e.g., 'inf')
+
+        # CORREÇÃO: A linha abaixo foi removida.
+        # df.dropna(inplace=True)
+        # Remover a linha acima é a correção principal. Agora, as bibliotecas de plotagem
+        # irão simplesmente ignorar os valores NaN ao calcular médias, em vez de
+        # apagar linhas inteiras de dados, o que causava o gráfico vazio.
+
         return df
 
     def plot_part1(self):
@@ -66,7 +73,7 @@ class ResultPlotter:
         plt.figure()
         sns.barplot(data=df, x='algorithm', y='nodes_visited')
         plt.title('Parte 1: Média de Nós Visitados por Algoritmo')
-        plt.ylabel('Média de Nós Visitados (Log Scale)')
+        plt.ylabel('Média de Nós Visitados (Escala Log)')
         plt.xlabel('Algoritmo')
         plt.yscale('log')  # Escala de log é útil quando os valores variam muito
         plt.tight_layout()
@@ -80,17 +87,15 @@ class ResultPlotter:
 
         print("Gerando gráficos para a Parte 2...")
 
-        # Prepara a coluna de 'legenda' para o gráfico
         df['algorithm_heuristic'] = df.apply(
             lambda row: f"A*({row['heuristic']})" if row['algorithm'] == 'AStarSearch' else 'UCS',
             axis=1
         )
 
-        # Gráfico 1: Média de Nós Visitados (UCS vs A*)
         plt.figure()
         sns.barplot(data=df, x='cost_function', y='nodes_visited', hue='algorithm_heuristic')
         plt.title('Parte 2: Média de Nós Visitados (UCS vs. A*)')
-        plt.ylabel('Média de Nós Visitados (Log Scale)')
+        plt.ylabel('Média de Nós Visitados (Escala Log)')
         plt.xlabel('Função de Custo')
         plt.yscale('log')
         plt.legend(title='Algoritmo (Heurística)')
@@ -105,18 +110,16 @@ class ResultPlotter:
 
         print("Gerando gráficos para a Parte 3...")
 
-        # Prepara a coluna de 'legenda'
         df['algorithm_heuristic'] = df.apply(
             lambda row: f"{row['algorithm'].replace('Search', '')}({row['heuristic']})",
             axis=1
         )
 
-        # Gráfico 1: Média de Nós Visitados (Greedy vs A*)
         plt.figure()
         sns.barplot(data=df, x='algorithm_heuristic', y='nodes_visited',
                     order=sorted(df['algorithm_heuristic'].unique()))
         plt.title('Parte 3: Média de Nós Visitados (Greedy vs. A*)')
-        plt.ylabel('Média de Nós Visitados (Log Scale)')
+        plt.ylabel('Média de Nós Visitados (Escala Log)')
         plt.xlabel('Algoritmo (Heurística)')
         plt.xticks(rotation=15)
         plt.yscale('log')
@@ -124,7 +127,6 @@ class ResultPlotter:
         plt.savefig(os.path.join(self.plots_dir, 'part3_avg_nodes_greedy_vs_astar.png'))
         plt.close()
 
-        # Gráfico 2: Custo Médio do Caminho (Greedy vs A*)
         plt.figure()
         sns.barplot(data=df, x='algorithm_heuristic', y='path_cost', hue='cost_function',
                     order=sorted(df['algorithm_heuristic'].unique()))
@@ -142,13 +144,9 @@ class ResultPlotter:
         self.plot_part1()
         self.plot_part2()
         self.plot_part3()
-        # A Parte 4 é mais sobre a variabilidade, um boxplot seria ideal,
-        # mas a análise principal é ver se os valores mudam ou não,
-        # o que é mais fácil de ver diretamente nos dados.
         print("\nGeração de gráficos concluída. Verifique a pasta 'plots'.")
 
 
 if __name__ == '__main__':
     plotter = ResultPlotter()
     plotter.plot_all()
-

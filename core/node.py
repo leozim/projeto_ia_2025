@@ -26,6 +26,7 @@ class Node:
         if parent:
             self.depth = parent.depth + 1
 
+    #magic method less than
     def __lt__(self, other):
         # Comparador necessário para a fila de prioridade (heapq).
         return self.path_cost < other.path_cost

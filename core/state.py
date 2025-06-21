@@ -18,7 +18,7 @@ class State:
             raise ValueError("O tabuleiro deve ter 9 elementos.")
         self.board = board
         # Pré-calcula e armazena a posição do espaço vazio para acesso rápido.
-        self.blank_pos = self.board.index(0)
+        self.blank_pos = self.board.index(0) # retorna o 1º índice do valor passado
 
     def __eq__(self, other):
         return isinstance(other, State) and self.board == other.board
@@ -27,6 +27,7 @@ class State:
         return hash(self.board)
 
     def __str__(self):
+        # converte tudo para uma linha única string e substitui 0 em _ p/ melhor visualização
         return "".join(map(str, self.board)).replace('0', '_')
 
     def to_matrix_str(self) -> str:

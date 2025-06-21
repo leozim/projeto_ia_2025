@@ -16,6 +16,7 @@ class EightPuzzleProblem(Problem):
     Implementação do problema 8-Puzzle com suas variações de custo e heurísticas.
     """
     _goal_states: List[State] = []
+    # Tem como chave State e valor um Dict[com chave numero-peça e coordenada(tupla int linha,coluna)
     _goal_coords: Dict[State, Dict[int, Tuple[int, int]]] = {}
 
     def __init__(self, initial_state: State, cost_type: str, heuristic_type: str | None = None):
