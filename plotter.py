@@ -40,16 +40,14 @@ class ResultPlotter:
 
         df = pd.read_csv(filepath)
         # Converte colunas para numérico, tratando erros. O 'coerce' transforma
-        # valores não numéricos (como 'inf') em NaN (Not a Number).
+        # valores não numéricos (como "inf") em NaN (Not a Number).
         for col in ['path_cost', 'nodes_visited', 'nodes_generated', 'execution_time_sec']:
             df[col] = pd.to_numeric(df[col], errors='coerce')
 
-        # CORREÇÃO: A linha abaixo foi removida.
-        # df.dropna(inplace=True)
-        # Remover a linha acima é a correção principal. Agora, as bibliotecas de plotagem
-        # irão simplesmente ignorar os valores NaN ao calcular médias, em vez de
-        # apagar linhas inteiras de dados, o que causava o gráfico vazio.
+        # CORREÇÃO: A linha 'df.dropna()' foi removida para que as falhas de um
+        # algoritmo não impeçam a plotagem dos resultados dos outros.
 
+        # Retorna o DataFrame carregado e limpo.
         return df
 
     def plot_part1(self):
@@ -75,9 +73,19 @@ class ResultPlotter:
         plt.title('Parte 1: Média de Nós Visitados por Algoritmo')
         plt.ylabel('Média de Nós Visitados (Escala Log)')
         plt.xlabel('Algoritmo')
-        plt.yscale('log')  # Escala de log é útil quando os valores variam muito
+        plt.yscale('log')
         plt.tight_layout()
         plt.savefig(os.path.join(self.plots_dir, 'part1_avg_nodes.png'))
+        plt.close()
+
+        # Gráfico 3: Distribuição do Custo da Solução
+        plt.figure()
+        sns.histplot(data=df, x='path_cost', hue='algorithm', multiple="layer", kde=True)
+        plt.title('Parte 1: Distribuição do Custo da Solução por Algoritmo')
+        plt.ylabel('Frequência')
+        plt.xlabel('Custo do Caminho Encontrado')
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.plots_dir, 'part1_cost_distribution.png'))
         plt.close()
 
     def plot_part2(self):
@@ -92,6 +100,7 @@ class ResultPlotter:
             axis=1
         )
 
+        # Gráfico 1: Média de Nós Visitados
         plt.figure()
         sns.barplot(data=df, x='cost_function', y='nodes_visited', hue='algorithm_heuristic')
         plt.title('Parte 2: Média de Nós Visitados (UCS vs. A*)')
@@ -101,6 +110,16 @@ class ResultPlotter:
         plt.legend(title='Algoritmo (Heurística)')
         plt.tight_layout()
         plt.savefig(os.path.join(self.plots_dir, 'part2_nodes_ucs_vs_astar.png'))
+        plt.close()
+
+        # Gráfico 2: Distribuição do Custo da Solução
+        plt.figure()
+        sns.histplot(data=df, x='path_cost', hue='algorithm_heuristic', multiple="layer", kde=True)
+        plt.title('Parte 2: Distribuição do Custo da Solução (UCS vs. A*)')
+        plt.ylabel('Frequência')
+        plt.xlabel('Custo do Caminho Encontrado')
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.plots_dir, 'part2_cost_distribution.png'))
         plt.close()
 
     def plot_part3(self):
@@ -115,6 +134,7 @@ class ResultPlotter:
             axis=1
         )
 
+        # Gráfico 1: Média de Nós Visitados
         plt.figure()
         sns.barplot(data=df, x='algorithm_heuristic', y='nodes_visited',
                     order=sorted(df['algorithm_heuristic'].unique()))
@@ -127,6 +147,7 @@ class ResultPlotter:
         plt.savefig(os.path.join(self.plots_dir, 'part3_avg_nodes_greedy_vs_astar.png'))
         plt.close()
 
+        # Gráfico 2: Custo Médio do Caminho
         plt.figure()
         sns.barplot(data=df, x='algorithm_heuristic', y='path_cost', hue='cost_function',
                     order=sorted(df['algorithm_heuristic'].unique()))
@@ -138,12 +159,56 @@ class ResultPlotter:
         plt.savefig(os.path.join(self.plots_dir, 'part3_avg_cost_greedy_vs_astar.png'))
         plt.close()
 
+        # Gráfico 3: Distribuição do Custo da Solução
+        plt.figure()
+        sns.histplot(data=df, x='path_cost', hue='algorithm_heuristic', multiple="layer", kde=True)
+        plt.title('Parte 3: Distribuição do Custo da Solução (Greedy vs. A*)')
+        plt.ylabel('Frequência')
+        plt.xlabel('Custo do Caminho Encontrado')
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.plots_dir, 'part3_cost_distribution.png'))
+        plt.close()
+
+    def plot_part4(self):
+        """Gera gráficos para o Experimento Parte 4."""
+        df = self._load_data("Part4")
+        if df is None: return
+
+        print("Gerando gráficos para a Parte 4...")
+
+        # Gráfico 1: Tempo Médio de Execução
+        plt.figure()
+        sns.barplot(data=df, x='algorithm', y='execution_time_sec')
+        plt.title('Parte 4: Tempo Médio de Execução com Randomização')
+        plt.ylabel('Tempo Médio de Execução (s)')
+        plt.xlabel('Algoritmo')
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.plots_dir, 'part4_avg_time.png'))
+        plt.close()
+
+        # Gráfico 2: Distribuição do Custo da Solução (Histograma)
+        # Este gráfico mostra a frequência de cada custo de solução encontrado.
+        plt.figure()
+        # 'hue' separa o histograma por algoritmo. 'multiple="layer"' sobrepõe os histogramas.
+        # 'kde=True' adiciona uma linha de densidade para visualizar melhor a distribuição.
+        sns.histplot(data=df, x='path_cost', hue='algorithm', multiple="layer", kde=True)
+        plt.title('Parte 4: Distribuição do Custo da Solução com Randomização')
+        plt.ylabel('Frequência (Contagem de Ocorrências)')
+        plt.xlabel('Custo do Caminho Encontrado')
+        plt.figtext(0.5, 0.01,
+                    "Nota: O pico único para BreadthFirstSearch indica resultado consistente.\nA distribuição espalhada para DepthFirstSearch mostra a alta variabilidade.",
+                    wrap=True, horizontalalignment='center', fontsize=10)
+        plt.tight_layout(rect=[0, 0.05, 1, 1])  # Ajusta para dar espaço para a nota
+        plt.savefig(os.path.join(self.plots_dir, 'part4_cost_distribution.png'))
+        plt.close()
+
     def plot_all(self):
         """Chama todas as funções de plotagem."""
         print("Iniciando geração de todos os gráficos...")
         self.plot_part1()
         self.plot_part2()
         self.plot_part3()
+        self.plot_part4()  # Adiciona a chamada para a nova função
         print("\nGeração de gráficos concluída. Verifique a pasta 'plots'.")
 
 
